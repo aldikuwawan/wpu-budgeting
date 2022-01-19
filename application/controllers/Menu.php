@@ -7,6 +7,7 @@ class Menu extends CI_Controller
     {
         parent::__construct();
         is_logged_in();
+        $this->load->library('template');
     }
 
  public function  index()
@@ -19,11 +20,7 @@ class Menu extends CI_Controller
         $this->form_validation->set_rules('menu','Menu','required');
 
         if($this->form_validation->run() == false ) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebar', $data);
-            $this->load->view('templates/topbar', $data);
-            $this->load->view('menu/index', $data);
-            $this->load->view('templates/footer');
+            $this->template->load('menu/index', $data);
 
         } else {
             $this->db->insert('user_menu', ['menu' => $this->input->post('menu')]);                            
@@ -50,11 +47,7 @@ class Menu extends CI_Controller
 
         
         if($this->form_validation->run() == false) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebar', $data);
-            $this->load->view('templates/topbar', $data);
-            $this->load->view('menu/submenu', $data);
-            $this->load->view('templates/footer');
+            $this->template->load('menu/submenu', $data);
 
         } else {
             $data = [

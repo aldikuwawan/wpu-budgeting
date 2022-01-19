@@ -7,20 +7,17 @@ class User extends CI_Controller
     {
         parent::__construct();
         is_logged_in();
-        
+        $this->load->library('template');
     }
 
     public function index()
     {
         $data['title'] = 'My Profile';
         $data['user'] = $this->db->get_where('user', ['email' =>
-         $this->session->userdata('email')])->row_array();
+        $this->session->userdata('email')])->row_array();
         
-        $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('user/index', $data);
-        $this->load->view('templates/footer');
+        
+        $this->template->load('user/index', $data);
     }
 
     public function pengajuan()
@@ -37,11 +34,7 @@ class User extends CI_Controller
         $this->form_validation->set_rules('value', 'Value', 'required');
 
         if($this->form_validation->run() == false) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebar', $data);
-            $this->load->view('templates/topbar', $data);
-            $this->load->view('user/pengajuan', $data);
-            $this->load->view('templates/footer');
+            $this->template->load('user/pengajuan', $data);
         } 
         
     }
