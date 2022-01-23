@@ -15,7 +15,7 @@
 
 
     <div class="container-fluid">
-        <h2 style="margin-top:0px">Pengajuan <?php echo $button ?></h2>
+        <h2 style="margin-top:0px">Pengajuan <?php echo $button ?> <?php echo $status_kirim == 0 ? '<span class="badge bg-danger text-white">Draft</span>' : '<span class="badge bg-success text-white">Terkirim</span>'; ?></h2>
         <form action="<?php echo $action; ?>" method="post">
 
             <div class="row">

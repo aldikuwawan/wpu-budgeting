@@ -47,7 +47,11 @@
 			<td width="80px"><?php echo ++$start ?></td>
 			<td><?php echo $pengajuan->jenis_pengajuan ?></td>
 			<td><?php echo $classnyak->get_data_user($pengajuan->user_id)->name ?></td>
-			<td><?php echo $pengajuan->status_kirim ?></td>
+			<td><?php 
+
+            echo $pengajuan->status_kirim == 0 ? '<span class="badge bg-danger text-white">Draft</span>' : '<span class="badge bg-success text-white">Terkirim</span>';
+
+            ?></td>
 			<td><?php echo $pengajuan->tanggal ?></td>
 			<td style="text-align:center" width="200px">
 				<?php 
