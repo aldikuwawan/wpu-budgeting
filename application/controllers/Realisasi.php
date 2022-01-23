@@ -22,11 +22,11 @@ class Realisasi extends CI_Controller
         $start = intval($this->input->get('start'));
         
         if ($q <> '') {
-            $config['base_url'] = base_url() . 'realisasi/index.html?q=' . urlencode($q);
-            $config['first_url'] = base_url() . 'realisasi/index.html?q=' . urlencode($q);
+            $config['base_url'] = base_url() . 'realisasi?q=' . urlencode($q);
+            $config['first_url'] = base_url() . 'realisasi?q=' . urlencode($q);
         } else {
-            $config['base_url'] = base_url() . 'realisasi/index.html';
-            $config['first_url'] = base_url() . 'realisasi/index.html';
+            $config['base_url'] = base_url() . 'realisasi';
+            $config['first_url'] = base_url() . 'realisasi';
         }
 
         $config['per_page'] = 10;
@@ -40,11 +40,12 @@ class Realisasi extends CI_Controller
         $data = array(
             'user' => $this->db->get_where('user', ['email' =>
             $this->session->userdata('email')])->row_array(),
-            'realisasi_data' => $realisasi,
+            'pengajuan_data' => $realisasi,
             'q' => $q,
             'pagination' => $this->pagination->create_links(),
             'total_rows' => $config['total_rows'],
             'start' => $start,
+            'classnyak' => $this
         );
         $this->template->load('realisasi/realisasi_list', $data);
     }
@@ -75,121 +76,6 @@ class Realisasi extends CI_Controller
             $this->template->load('realisasi/realisasi_read', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('realisasi'));
-        }
-    }
-
-    public function create() 
-    {
-        $data = array(
-            'user' => $this->db->get_where('user', ['email' =>
-                $this->session->userdata('email')])->row_array(),
-            'button' => 'Create',
-            'action' => site_url('realisasi/create_action'),
-	    'id_realisasi' => set_value('id_realisasi'),
-	    'fisical_year' => set_value('fisical_year'),
-	    'period' => set_value('period'),
-	    'posting_date' => set_value('posting_date'),
-	    'dokumen_date' => set_value('dokumen_date'),
-	    'cost_element' => set_value('cost_element'),
-	    'cost_element_descr' => set_value('cost_element_descr'),
-	    'object_type' => set_value('object_type'),
-	    'wbs_element' => set_value('wbs_element'),
-	    'project_devinition' => set_value('project_devinition'),
-	    'co_object_name' => set_value('co_object_name'),
-	    'name' => set_value('name'),
-	    'co_area_curency' => set_value('co_area_curency'),
-	    'Val_coarea_crcy' => set_value('Val_coarea_crcy'),
-	);
-        $this->template->load('realisasi/realisasi_form', $data);
-    }
-    
-    public function create_action() 
-    {
-        $this->_rules();
-
-        if ($this->form_validation->run() == FALSE) {
-            $this->create();
-        } else {
-            $data = array(
-		'fisical_year' => $this->input->post('fisical_year',TRUE),
-		'period' => $this->input->post('period',TRUE),
-		'posting_date' => $this->input->post('posting_date',TRUE),
-		'dokumen_date' => $this->input->post('dokumen_date',TRUE),
-		'cost_element' => $this->input->post('cost_element',TRUE),
-		'cost_element_descr' => $this->input->post('cost_element_descr',TRUE),
-		'object_type' => $this->input->post('object_type',TRUE),
-		'wbs_element' => $this->input->post('wbs_element',TRUE),
-		'project_devinition' => $this->input->post('project_devinition',TRUE),
-		'co_object_name' => $this->input->post('co_object_name',TRUE),
-		'name' => $this->input->post('name',TRUE),
-		'co_area_curency' => $this->input->post('co_area_curency',TRUE),
-		'Val_coarea_crcy' => $this->input->post('Val_coarea_crcy',TRUE),
-	    );
-
-            $this->Realisasi_model->insert($data);
-            $this->session->set_flashdata('message', 'Create Record Success');
-            redirect(site_url('realisasi'));
-        }
-    }
-    
-    public function update($id) 
-    {
-        $row = $this->Realisasi_model->get_by_id($id);
-
-        if ($row) {
-            $data = array(
-                'user' => $this->db->get_where('user', ['email' =>
-                $this->session->userdata('email')])->row_array(),
-                'button' => 'Update',
-                'action' => site_url('realisasi/update_action'),
-		'id_realisasi' => set_value('id_realisasi', $row->id_realisasi),
-		'fisical_year' => set_value('fisical_year', $row->fisical_year),
-		'period' => set_value('period', $row->period),
-		'posting_date' => set_value('posting_date', $row->posting_date),
-		'dokumen_date' => set_value('dokumen_date', $row->dokumen_date),
-		'cost_element' => set_value('cost_element', $row->cost_element),
-		'cost_element_descr' => set_value('cost_element_descr', $row->cost_element_descr),
-		'object_type' => set_value('object_type', $row->object_type),
-		'wbs_element' => set_value('wbs_element', $row->wbs_element),
-		'project_devinition' => set_value('project_devinition', $row->project_devinition),
-		'co_object_name' => set_value('co_object_name', $row->co_object_name),
-		'name' => set_value('name', $row->name),
-		'co_area_curency' => set_value('co_area_curency', $row->co_area_curency),
-		'Val_coarea_crcy' => set_value('Val_coarea_crcy', $row->Val_coarea_crcy),
-	    );
-            $this->template->load('realisasi/realisasi_form', $data);
-        } else {
-            $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('realisasi'));
-        }
-    }
-    
-    public function update_action() 
-    {
-        $this->_rules();
-
-        if ($this->form_validation->run() == FALSE) {
-            $this->update($this->input->post('id_realisasi', TRUE));
-        } else {
-            $data = array(
-		'fisical_year' => $this->input->post('fisical_year',TRUE),
-		'period' => $this->input->post('period',TRUE),
-		'posting_date' => $this->input->post('posting_date',TRUE),
-		'dokumen_date' => $this->input->post('dokumen_date',TRUE),
-		'cost_element' => $this->input->post('cost_element',TRUE),
-		'cost_element_descr' => $this->input->post('cost_element_descr',TRUE),
-		'object_type' => $this->input->post('object_type',TRUE),
-		'wbs_element' => $this->input->post('wbs_element',TRUE),
-		'project_devinition' => $this->input->post('project_devinition',TRUE),
-		'co_object_name' => $this->input->post('co_object_name',TRUE),
-		'name' => $this->input->post('name',TRUE),
-		'co_area_curency' => $this->input->post('co_area_curency',TRUE),
-		'Val_coarea_crcy' => $this->input->post('Val_coarea_crcy',TRUE),
-	    );
-
-            $this->Realisasi_model->update($this->input->post('id_realisasi', TRUE), $data);
-            $this->session->set_flashdata('message', 'Update Record Success');
             redirect(site_url('realisasi'));
         }
     }
@@ -289,6 +175,11 @@ class Realisasi extends CI_Controller
 
         xlsEOF();
         exit();
+    }
+
+    public function get_data_user($id)
+    {
+        return $this->db->where('id', $id)->get('user')->row();
     }
 
 }

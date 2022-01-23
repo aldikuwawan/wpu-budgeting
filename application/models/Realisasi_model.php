@@ -6,8 +6,8 @@ if (!defined('BASEPATH'))
 class Realisasi_model extends CI_Model
 {
 
-    public $table = 'realisasi';
-    public $id = 'id_realisasi';
+    public $table = 'pengajuan';
+    public $id = 'id_pengajuan';
     public $order = 'DESC';
 
     function __construct()
@@ -31,42 +31,28 @@ class Realisasi_model extends CI_Model
     
     // get total rows
     function total_rows($q = NULL) {
-        $this->db->like('id_realisasi', $q);
-	$this->db->or_like('fisical_year', $q);
-	$this->db->or_like('period', $q);
-	$this->db->or_like('posting_date', $q);
-	$this->db->or_like('dokumen_date', $q);
-	$this->db->or_like('cost_element', $q);
-	$this->db->or_like('cost_element_descr', $q);
-	$this->db->or_like('object_type', $q);
-	$this->db->or_like('wbs_element', $q);
-	$this->db->or_like('project_devinition', $q);
-	$this->db->or_like('co_object_name', $q);
-	$this->db->or_like('name', $q);
-	$this->db->or_like('co_area_curency', $q);
-	$this->db->or_like('Val_coarea_crcy', $q);
-	$this->db->from($this->table);
+        $this->db->where('status_kirim', '1');
+        // $this->db->like('id_pengajuan', $q);
+        // $this->db->or_like('data_pengajuan', $q);
+        // $this->db->or_like('jenis_pengajuan', $q);
+        // $this->db->or_like('pengimput', $q);
+        // $this->db->or_like('status_kirim', $q);
+        // $this->db->or_like('tanggal', $q);
+        $this->db->from($this->table);
         return $this->db->count_all_results();
     }
 
     // get data with limit and search
     function get_limit_data($limit, $start = 0, $q = NULL) {
+        $this->db->where('status_kirim', '1');
         $this->db->order_by($this->id, $this->order);
-        $this->db->like('id_realisasi', $q);
-	$this->db->or_like('fisical_year', $q);
-	$this->db->or_like('period', $q);
-	$this->db->or_like('posting_date', $q);
-	$this->db->or_like('dokumen_date', $q);
-	$this->db->or_like('cost_element', $q);
-	$this->db->or_like('cost_element_descr', $q);
-	$this->db->or_like('object_type', $q);
-	$this->db->or_like('wbs_element', $q);
-	$this->db->or_like('project_devinition', $q);
-	$this->db->or_like('co_object_name', $q);
-	$this->db->or_like('name', $q);
-	$this->db->or_like('co_area_curency', $q);
-	$this->db->or_like('Val_coarea_crcy', $q);
-	$this->db->limit($limit, $start);
+        // $this->db->like('id_pengajuan', $q);
+        // $this->db->or_like('data_pengajuan', $q);
+        // $this->db->or_like('jenis_pengajuan', $q);
+        // $this->db->or_like('pengimput', $q);
+        // $this->db->or_like('status_kirim', $q);
+        // $this->db->or_like('tanggal', $q);
+        $this->db->limit($limit, $start);
         return $this->db->get($this->table)->result();
     }
 

@@ -49,31 +49,6 @@ class Pengajuan extends CI_Controller
         $this->template->load('pengajuan/pengajuan_list', $data);
     }
 
-    public function read($id) 
-    {
-        $row = $this->Pengajuan_model->get_by_id($id);
-        if ($row) {
-            $data = array(
-                'user' => $this->db->get_where('user', ['email' =>
-            $this->session->userdata('email')])->row_array(),
-        		'id_pengajuan' => $row->id_pengajuan,
-        		'data_pengajuan' => $row->data_pengajuan,
-        		'jenis_pengajuan' => $row->jenis_pengajuan,
-        		'pengimput' => $row->pengimput,
-                'user_id' => $row->user_id,
-        		'status_kirim' => $row->status_kirim,
-        		'tanggal' => $row->tanggal,
-                'classnyak' => $this,
-                'role_data' => $this->db->where('id', $row->pengimput)->get('user_role')->row(),
-                'keterangan' => $row->keterangan,
-    	    );
-            $this->template->load('pengajuan/pengajuan_read', $data);
-        } else {
-            $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('pengajuan'));
-        }
-    }
-
     public function create() 
     {
         $p = $this->db->get_where('user', ['email' =>
@@ -82,8 +57,7 @@ class Pengajuan extends CI_Controller
         $role_data = $this->db->where('id', $this->session->userdata('role_id'))->get('user_role')->row();
         $data = array(
             'user' => $p,
-            'button' => 'Create',
-            'action' => site_url('pengajuan/create_action'),
+            'button' => 'Buat',
     	    'id_pengajuan' => '',   
     	    'data_pengajuan' => set_value('data_pengajuan'),
     	    'jenis_pengajuan' => set_value('jenis_pengajuan'),
@@ -97,55 +71,24 @@ class Pengajuan extends CI_Controller
         $this->template->load('pengajuan/pengajuan_form', $data);
     }
     
-    public function create_action() 
-    {
-
-        $arraydatapengajuan = [];
-
-        $cost_center = $this->input->post('cost_center');
-
-        $i = 1;
-
-        foreach ($cost_center as $key => $value) {
-            $arraydatapengajuan[] = array(
-                'datake' => $i,
-                 'cost_center' => $this->input->post('cost_center')[$key], 
-                'cost_element_name' => $this->input->post('cost_element_name')[$key], 
-                'cost_element' => $this->input->post('cost_element')[$key], 
-                'work_activity' => $this->input->post('work_activity')[$key], 
-                'value' => $this->input->post('value')[$key], 
-            );
-
-            $i++;
-        }
-
-        // echo json_encode($arraydatapengajuan);
-
-        $data = array(
-    		'data_pengajuan' => json_encode($arraydatapengajuan),
-    		'jenis_pengajuan' => $this->input->post('jenis_pengajuan',TRUE),
-            'keterangan' => $this->input->post('keterangan',TRUE),
-    		'pengimput' => $this->session->userdata('role_id'),
-            'user_id' => $this->session->userdata('user_id'),
-    		'status_kirim' => 0
-       );
-
-        $this->Pengajuan_model->insert($data);
-        $this->session->set_flashdata('message', 'Create Record Success');
-        redirect(site_url('pengajuan'));
-    }
-    
     public function update($id) 
     {
         $row = $this->Pengajuan_model->get_by_id($id);
+        $p = $this->db->get_where('user', ['email' =>
+            $this->session->userdata('email')])->row_array();
 
         if ($row) {
+            $p = $this->db->get_where('user', [
+                'id' => $row->user_id
+            ])->row_array();
+
+            $role_data = $this->db->where('id', $row->pengimput)->get('user_role')->row();
             $data = array(
-                'button' => 'Update',
-                'action' => site_url('pengajuan/update_action'),
+                'user' => $p,
+                'button' => 'Edit',
         		'id_pengajuan' => $row->id_pengajuan,
-                'nama_penginput' => $row->user_id,
-                'role' => $row->pengimput,
+                'nama_penginput' => $p['name'],
+                'role' => $role_data->role,
         		'data_pengajuan' => $row->data_pengajuan,
         		'jenis_pengajuan' => set_value('jenis_pengajuan', $row->jenis_pengajuan),
         		'pengimput' => set_value('pengimput', $row->pengimput),
@@ -160,25 +103,30 @@ class Pengajuan extends CI_Controller
         }
     }
     
-    public function update_action() 
+    public function send_pengajuan() 
     {
-        $this->_rules();
+        $id_pengajuan = $this->input->post('id_pengajuan');
+        $row = $this->Pengajuan_model->get_by_id($id_pengajuan);
 
-        if ($this->form_validation->run() == FALSE) {
-            $this->update($this->input->post('id_pengajuan', TRUE));
+        if ($row) {
+            $datatoupdate = array(
+                'status_kirim' => 1
+            );
+
+            $this->Pengajuan_model->update($id_pengajuan,$datatoupdate);
+
+            $arr = array(
+                'response' => 'ok'
+            );
+
+            echo json_encode($arr);
+            // $this->session->set_flashdata('message', 'Pengajuan Berhasil Dikirim');
+            // redirect(site_url('pengajuan'));
+
         } else {
-            $data = array(
-    		'data_pengajuan' => $this->input->post('data_pengajuan',TRUE),
-    		'jenis_pengajuan' => $this->input->post('jenis_pengajuan',TRUE),
-    		'pengimput' => $this->input->post('pengimput',TRUE),
-    		'status_kirim' => $this->input->post('status_kirim',TRUE),
-    		'tanggal' => $this->input->post('tanggal',TRUE),
-    	    );
-
-            $this->Pengajuan_model->update($this->input->post('id_pengajuan', TRUE), $data);
-            $this->session->set_flashdata('message', 'Update Record Success');
-            redirect(site_url('pengajuan'));
+            echo 'error sending pengajuan';
         }
+
     }
     
     public function delete($id) 
@@ -280,32 +228,45 @@ class Pengajuan extends CI_Controller
             $getdata = $this->Pengajuan_model->get_by_id($id_pengajuan);
 
             if ($getdata) {
-                $datapengajuan = json_decode($getdata->data_pengajuan, TRUE);
+                $data_pengajuan_temp = null;
 
-                $data_pengajuan_temp = $datapengajuan;
+                if (!$getdata->data_pengajuan) {
 
+                    $data_pengajuan_temp[] = array(
+                        'row' =>  1,
+                        'cost_center' => $cost_center,
+                        'cost_element_name' => $cost_element_name,
+                        'cost_element' => $cost_element,
+                        'work_activity' => $work_activity,
+                        'value' => $value
+                    );
+                } else {
+                    $datapengajuan = json_decode($getdata->data_pengajuan, TRUE);
 
-                $last_data = end($data_pengajuan_temp);
+                    $data_pengajuan_temp = $datapengajuan;
 
-                $last_data_ke = $last_data['row'];
+                    $last_data = end($data_pengajuan_temp);
 
-                $data_pengajuan_temp[] = array(
-                    'row' =>  $last_data_ke + 1,
-                    'cost_center' => $cost_center,
-                    'cost_element_name' => $cost_element_name,
-                    'cost_element' => $cost_element,
-                    'work_activity' => $work_activity,
-                    'value' => $value
-                );
+                    $last_data_ke = $last_data['row'];
 
-                $datatoinsert = array(
+                    $data_pengajuan_temp[] = array(
+                        'row' =>  $last_data_ke + 1,
+                        'cost_center' => $cost_center,
+                        'cost_element_name' => $cost_element_name,
+                        'cost_element' => $cost_element,
+                        'work_activity' => $work_activity,
+                        'value' => $value
+                    );
+                }
+
+                $datatoupdate = array(
                     'data_pengajuan' => json_encode($data_pengajuan_temp),
                     'jenis_pengajuan' => $jenis_pengajuan,
                     'tanggal' => date('Y-m-d H:i:s'),
                     'keterangan' => $keterangan
                 );
 
-                $this->Pengajuan_model->update($id_pengajuan,$datatoinsert);
+                $this->Pengajuan_model->update($id_pengajuan,$datatoupdate);
             }
 
             // echo 'UPDATING!';
@@ -346,6 +307,69 @@ class Pengajuan extends CI_Controller
         );
 
         echo json_encode($arr);
+    }
+
+    public function save_pengajuan_as_draft()
+    {
+        $id_pengajuan = $this->input->post('id_pengajuan');
+        $jenis_pengajuan = $this->input->post('jenis_pengajuan');
+        $keterangan = $this->input->post('keterangan');
+
+        $status = 'ok';
+        $message = 'new code';
+
+        if ($id_pengajuan) {
+            $message = 'using old code';
+
+            $getdata = $this->Pengajuan_model->get_by_id($id_pengajuan);
+
+            if ($getdata) {
+                $datatoupdate = array(
+                    'jenis_pengajuan' => $jenis_pengajuan,
+                    'tanggal' => date('Y-m-d H:i:s'),
+                    'keterangan' => $keterangan
+                );
+
+                $this->Pengajuan_model->update($id_pengajuan,$datatoupdate);
+            }
+
+            // echo 'UPDATING!';
+        } else {
+            $datatoinsert = array(
+                'jenis_pengajuan' => $jenis_pengajuan,
+                'pengimput' => $this->session->userdata('role_id'),
+                'user_id' => $this->session->userdata('user_id'),
+                'status_kirim' => 0,
+                'tanggal' => date('Y-m-d H:i:s'),
+                'keterangan' => $keterangan
+            );
+
+            $this->Pengajuan_model->insert($datatoinsert);
+
+            $id_pengajuan_generated = $this->db->insert_id();
+
+            $id_pengajuan = $id_pengajuan_generated;
+        }
+
+        $arr = array(
+            'status' => $status,
+            'message' => $message,
+            'id_pengajuan' => $id_pengajuan
+        );
+
+        echo json_encode($arr);
+    }
+
+    public function success()
+    {
+        $doing = $this->input->get('thing');
+        $operation = $this->input->get('operation');
+
+        if ($operation == 'send') {
+            $this->session->set_flashdata('success', $doing.' berhasil dikirim');
+        }
+
+        redirect(site_url('pengajuan'));
     }
 
 }

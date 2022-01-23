@@ -1,14 +1,21 @@
+<?php
+    if ($this->session->userdata('success')) {
+        ?>
+            <div class="flash-data" data-flashdata="<?= $this->session->userdata('success'); ?>"></div>
+        <?php
+    }
 
+    if ($this->session->userdata('failed')) {
+        ?>
+            <div class="flash-data2" data-flashdata="<?= $this->session->userdata('failed'); ?>"></div>
+        <?php
+    }
+?>
     <div class="container-fluid">
         <h2 style="margin-top:0px">Pengajuan List</h2>
         <div class="row" style="margin-bottom: 10px">
             <div class="col-md-4">
                 <?php echo anchor(site_url('pengajuan/create'),'Create', 'class="btn btn-primary"'); ?>
-            </div>
-            <div class="col-md-4 text-center">
-                <div style="margin-top: 8px" id="message">
-                    <?php echo $this->session->userdata('message') <> '' ? $this->session->userdata('message') : ''; ?>
-                </div>
             </div>
             <div class="col-md-1 text-right">
             </div>
@@ -54,12 +61,17 @@
             ?></td>
 			<td><?php echo $pengajuan->tanggal ?></td>
 			<td style="text-align:center" width="200px">
+                <div class="btn-group">
+                    <a class="btn btn-sm btn-success" href="<?php echo site_url('pengajuan/update/'.$pengajuan->id_pengajuan) ?>"><i class="fas fa-eye"></i></a>
+                    <?php
+                    if ($pengajuan->status_kirim == 0) {
+                        ?>
+                        <a class="btn btn-sm btn-danger" href="<?php echo site_url('pengajuan/delete/'.$pengajuan->id_pengajuan) ?>"><i class="fas fa-trash-alt"></i></a>
+                        <?php
+                    }
+                    ?>
+                </div>
 				<?php 
-				echo anchor(site_url('pengajuan/read/'.$pengajuan->id_pengajuan),'Read'); 
-				echo ' | '; 
-				echo anchor(site_url('pengajuan/update/'.$pengajuan->id_pengajuan),'Update'); 
-				echo ' | '; 
-				echo anchor(site_url('pengajuan/delete/'.$pengajuan->id_pengajuan),'Delete','onclick="javasciprt: return confirm(\'Are You Sure ?\')"'); 
 				?>
 			</td>
 		</tr>

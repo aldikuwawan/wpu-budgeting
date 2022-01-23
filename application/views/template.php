@@ -133,7 +133,7 @@ $queryMenu = "SELECT `user_menu`.`id`,`menu`
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?= $user['name']; ?></span>
                     <img class="img-profile rounded-circle"
-                        src="assets/img/profile/default.jpg.jpg">
+                        src="<?php echo base_url().'assets/img/profile/default.jpg' ?>">
                 </a>
                 <!-- Dropdown - User Information -->
                 <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -219,6 +219,7 @@ $queryMenu = "SELECT `user_menu`.`id`,`menu`
     <!-- Page level custom scripts -->
     <script src="<?= base_url('assets/'); ?>js/demo/chart-area-demo.js"></script>
     <script src="<?= base_url('assets/'); ?>js/demo/chart-pie-demo.js"></script>
+    <script src="<?php echo base_url() ?>assets/js/dataflash.js"></script>
 
 </body>
 
