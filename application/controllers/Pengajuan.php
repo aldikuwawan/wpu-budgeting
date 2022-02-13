@@ -207,17 +207,14 @@ class Pengajuan extends CI_Controller
         return $this->db->where('id', $id)->get('user')->row();
     }
 
-    public function auto_save_pengajuan(){
-
+    public function update_listdata_pengajuan()
+    {
         $id_pengajuan = $this->input->post('id_pengajuan');
         $jenis_pengajuan = $this->input->post('jenis_pengajuan');
         $keterangan = $this->input->post('keterangan');
 
-        $cost_center = $this->input->post('cost_center');
-        $cost_element_name = $this->input->post('cost_element_name');
-        $cost_element = $this->input->post('cost_element');
-        $work_activity = $this->input->post('work_activity');
-        $value = $this->input->post('value');
+        $listpengajuannya = $this->input->post('data_pengajuan');
+        // print_r($listpengajuannya);
 
         $status = 'ok';
         $message = 'new code';
@@ -228,39 +225,8 @@ class Pengajuan extends CI_Controller
             $getdata = $this->Pengajuan_model->get_by_id($id_pengajuan);
 
             if ($getdata) {
-                $data_pengajuan_temp = null;
-
-                if (!$getdata->data_pengajuan) {
-
-                    $data_pengajuan_temp[] = array(
-                        'row' =>  1,
-                        'cost_center' => $cost_center,
-                        'cost_element_name' => $cost_element_name,
-                        'cost_element' => $cost_element,
-                        'work_activity' => $work_activity,
-                        'value' => $value
-                    );
-                } else {
-                    $datapengajuan = json_decode($getdata->data_pengajuan, TRUE);
-
-                    $data_pengajuan_temp = $datapengajuan;
-
-                    $last_data = end($data_pengajuan_temp);
-
-                    $last_data_ke = $last_data['row'];
-
-                    $data_pengajuan_temp[] = array(
-                        'row' =>  $last_data_ke + 1,
-                        'cost_center' => $cost_center,
-                        'cost_element_name' => $cost_element_name,
-                        'cost_element' => $cost_element,
-                        'work_activity' => $work_activity,
-                        'value' => $value
-                    );
-                }
-
                 $datatoupdate = array(
-                    'data_pengajuan' => json_encode($data_pengajuan_temp),
+                    'data_pengajuan' => json_encode($listpengajuannya),
                     'jenis_pengajuan' => $jenis_pengajuan,
                     'tanggal' => date('Y-m-d H:i:s'),
                     'keterangan' => $keterangan
@@ -268,23 +234,10 @@ class Pengajuan extends CI_Controller
 
                 $this->Pengajuan_model->update($id_pengajuan,$datatoupdate);
             }
-
-            // echo 'UPDATING!';
         } else {
 
-            $arraydatapengajuan = [];
-
-            $arraydatapengajuan[] = array(
-                'row' =>  1,
-                'cost_center' => $cost_center,
-                'cost_element_name' => $cost_element_name,
-                'cost_element' => $cost_element,
-                'work_activity' => $work_activity,
-                'value' => $value
-            );
-
             $datatoinsert = array(
-                'data_pengajuan' => json_encode($arraydatapengajuan),
+                'data_pengajuan' => json_encode($listpengajuannya),
                 'jenis_pengajuan' => $jenis_pengajuan,
                 'pengimput' => $this->session->userdata('role_id'),
                 'user_id' => $this->session->userdata('user_id'),
@@ -309,12 +262,14 @@ class Pengajuan extends CI_Controller
         echo json_encode($arr);
     }
 
+
     public function save_pengajuan_as_draft()
     {
         $id_pengajuan = $this->input->post('id_pengajuan');
         $jenis_pengajuan = $this->input->post('jenis_pengajuan');
         $keterangan = $this->input->post('keterangan');
 
+        
         $status = 'ok';
         $message = 'new code';
 

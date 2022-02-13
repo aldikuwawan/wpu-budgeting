@@ -13,7 +13,7 @@
 </style>
 
 
-
+<input type="hidden" id="id_pengajuan" value="<?php echo $id_pengajuan ?>">
     <div class="container-fluid">
         <h2 style="margin-top:0px"><span id="tindakan"><?php echo $button ?></span> Pengajuan <?php echo $status_kirim == 0 ? '<span class="badge bg-danger text-white">Draft</span>' : '<span class="badge bg-success text-white">Terkirim</span>'; ?></h2>
         <form id="form_pengajuan">
@@ -92,13 +92,13 @@
 
                             foreach ($dtpengj as $key => $value) {
                                 ?>
-                                <tr>
-                                    <td><?php echo $value['cost_center'] ?><input type="hidden" value="<?php echo $value['cost_center'] ?>" name="cost_center[]"/></td>
-                                    <td><?php echo $value['cost_element_name'] ?><input type="hidden" value="<?php echo $value['cost_element_name'] ?>" name="cost_element_name[]"/></td>
-                                    <td><?php echo $value['cost_element'] ?><input type="hidden" value="<?php echo $value['cost_element'] ?>" name="cost_element[]"/></td>
-                                    <td><?php echo $value['work_activity'] ?><input type="hidden" value="<?php echo $value['work_activity'] ?>" name="work_activity[]"/></td>
-                                    <td><?php echo $value['value'] ?><input type="hidden" value="<?php echo $value['value'] ?>" name="value[]"/></td>
-                                    <td>Edit | Delete</td>
+                                <tr class="datany">
+                                    <td><?php echo $value['cost_center'] ?><input type="hidden" value="<?php echo $value['cost_center'] ?>" class="cost_center" name="cost_center[]"/></td>
+                                    <td><?php echo $value['cost_element_name'] ?><input type="hidden" value="<?php echo $value['cost_element_name'] ?>" class="cost_element_name" name="cost_element_name[]"/></td>
+                                    <td><?php echo $value['cost_element'] ?><input type="hidden" value="<?php echo $value['cost_element'] ?>" class="cost_element" name="cost_element[]"/></td>
+                                    <td><?php echo $value['work_activity'] ?><input type="hidden" value="<?php echo $value['work_activity'] ?>" class="work_activity" name="work_activity[]"/></td>
+                                    <td><?php echo $value['value'] ?><input type="hidden" value="<?php echo $value['value'] ?>" class="value" name="value[]"/></td>
+                                    <td><input type="hidden" value="<?php echo $value['unique_id'] ?>" class="unique_id" name="unique_id[]"/>Edit | Delete</td>
                                 </tr>
                                 <?php
                             }
@@ -107,7 +107,6 @@
                     </tbody>
                 </table>
             </div>
-    	    <input type="hidden" name="id_pengajuan" value="<?php echo $id_pengajuan; ?>" />
             <?php
             if ($status_kirim == 0) {
                 ?>
@@ -121,24 +120,69 @@
     </div>
 
     <script>
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
-          }
-        })
+
 
         $(document).ready(function() {
+
+            function update_data() {
+                // create empty array to store data
+                var data = [];
+                
+                var jenis_pengajuan = $('#jenis_pengajuan').val()                
+
+                $('#list_data tr').each(function(index, el) {
+                    // get each input from td
+                    var cost_center = $(this).find('input.cost_center').val();
+                    var cost_element_name = $(this).find('input.cost_element_name').val();
+                    var cost_element = $(this).find('input.cost_element').val();
+                    var work_activity = $(this).find('input.work_activity').val();
+                    var value = $(this).find('input.value').val();
+                    var unique_id = $(this).find('input.unique_id').val();
+
+                    // push to array
+                    data.push({
+                        unique_id: unique_id,
+                        cost_center: cost_center,
+                        cost_element_name: cost_element_name,
+                        cost_element: cost_element,
+                        work_activity: work_activity,
+                        value: value
+                    });
+                });
+                var id_pengajuan = $('#id_pengajuan').val();
+                var keterangan = $('#keterangan').val()
+                $.ajax({
+                    url: '<?php echo site_url('pengajuan/update_listdata_pengajuan') ?>',
+                    type: 'POST',
+                    data: {
+                        id_pengajuan: id_pengajuan,
+                        jenis_pengajuan: jenis_pengajuan,
+                        data_pengajuan: data,
+                        keterangan: keterangan
+                    },
+                    success: function(data) {
+                        var dt = JSON.parse(data);
+                        if (dt.status == 'ok') {
+                            Toast.fire({
+                                type: 'success',
+                                icon: 'success',
+                                title: 'Data berhasil diupdate'
+                            })
+                            $('#id_pengajuan').val(dt.id_pengajuan);
+                        } else {
+                            Toast.fire({
+                                icon: 'error',
+                                type: 'error',
+                                title: 'Data gagal diupdate'
+                            })
+                        }
+                    }
+                });
+            }
+
             $(document).on('click','.btn-add-data',function(e) {
 
                 e.preventDefault()
-
-                var jenis_pengajuan = $('#jenis_pengajuan').val()
 
                 var cost_center = $('#cost_center').val()
                 var cost_element_name = $('#cost_element_name').val()
@@ -146,69 +190,18 @@
                 var work_activity = $('#work_activity').val()
                 var value = $('#value').val()
 
-                var thisel = $(this)
+                var urutan = $('#list_data tr').length + 1;
 
-                thisel.html('<i class="fas fa-sync fa-spin"></i>').addClass('disabled').attr('disabled')
+                $('#list_data').append(`<tr>
+                    <td>${cost_center}<input type="hidden" value="${cost_center}" class="cost_center" name="cost_center[]"/></td>
+                    <td>${cost_element_name}<input type="hidden" value="${cost_element_name}" class="cost_element_name" name="cost_element_name[]"/></td>
+                    <td>${cost_element}<input type="hidden" value="${cost_element}" class="cost_element" name="cost_element[]"/></td>
+                    <td>${work_activity}<input type="hidden" value="${work_activity}" class="work_activity" name="work_activity[]"/></td>
+                    <td>${value}<input type="hidden" value="${value}" class="value" name="value[]"/></td>
+                    <td><input type="hidden" value="${urutan}" class="unique_id" name="unique_id[]"/>Edit | Delete</td>
+                </tr>`)
 
-                var id_pengajuan = $(this).attr('data-idpengajuan')
-                var keterangan = $('#keterangan').val()
-
-                $.ajax({
-                    type: "POST",
-                    url: "<?php echo base_url().'Pengajuan/auto_save_pengajuan'?>",
-                    data: {
-                        id_pengajuan: id_pengajuan,
-                        jenis_pengajuan: jenis_pengajuan,
-                        cost_center: cost_center,
-                        cost_element_name: cost_element_name,
-                        cost_element: cost_element,
-                        work_activity: work_activity,
-                        value: value,
-                        keterangan: keterangan
-                    },
-                    success: function(data){
-                        var dt = JSON.parse(data)
-                            
-                        if (dt.status == 'ok') {
-                            if (dt.message == 'using old code') {
-                                thisel.attr('data-idpengajuan',dt.id_pengajuan)
-                                Toast.fire({
-                                  icon: 'success',
-                                  title: 'Berhasil menyimpan'
-                                })
-                            }
-
-                            if (dt.message == 'new code') {
-                                thisel.attr('data-idpengajuan',dt.id_pengajuan)
-                                Toast.fire({
-                                  icon: 'success',
-                                  title: 'Disimpan otomatis'
-                                })
-                            }
-
-                            $('#list_data').append(`<tr>
-                                <td>${cost_center}<input type="hidden" value="${cost_center}" name="cost_center[]"/></td>
-                                <td>${cost_element_name}<input type="hidden" value="${cost_element_name}" name="cost_element_name[]"/></td>
-                                <td>${cost_element}<input type="hidden" value="${cost_element}" name="cost_element[]"/></td>
-                                <td>${work_activity}<input type="hidden" value="${work_activity}" name="work_activity[]"/></td>
-                                <td>${value}<input type="hidden" value="${value}" name="value[]"/></td>
-                                <td>Edit | Delete</td>
-                            </tr>`)
-                        }
-
-                        //getAllKuesioner()
-                        thisel.html('Add').removeClass('disabled').removeAttr('disabled')
-                    },
-                    error: function(error) {
-                        Swal.fire({
-                          icon: 'error',
-                          title: "Oops!",
-                          text: 'Tidak dapat tersambung dengan server, pastikan koneksi anda aktif, jika masih terjadi hubungi admin IT'
-                        })
-                        thisel.html('Add').removeClass('disabled').removeAttr('disabled')
-                    }
-                });
-
+                update_data()
             })
 
             $(document).on('click','.btn-save-as-draft',function(e) {
