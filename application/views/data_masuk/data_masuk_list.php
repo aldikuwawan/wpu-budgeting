@@ -14,10 +14,10 @@
 
 
     <div class="container-fluid">
-        <h2 style="margin-top:0px">Realisasi List</h2>
+        <h2 style="margin-top:0px">List Data Masuk</h2>
         <div class="row" style="margin-bottom: 10px">
             <div class="col-md-4">
-                <?php echo anchor(site_url('pengajuan/create'),'Create', 'class="btn btn-primary"'); ?>
+                
             </div>
             <div class="col-md-1 text-right">
             </div>

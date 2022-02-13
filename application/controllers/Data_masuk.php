@@ -3,12 +3,12 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Realisasi extends CI_Controller
+class Data_masuk extends CI_Controller
 {
     function __construct()
     {
         parent::__construct();
-        $this->load->model('Realisasi_model');
+        $this->load->model('Data_masuk_model');
         $this->load->library('form_validation');
         $this->load->library('template');
         
@@ -22,17 +22,17 @@ class Realisasi extends CI_Controller
         $start = intval($this->input->get('start'));
         
         if ($q <> '') {
-            $config['base_url'] = base_url() . 'realisasi?q=' . urlencode($q);
-            $config['first_url'] = base_url() . 'realisasi?q=' . urlencode($q);
+            $config['base_url'] = base_url() . 'data_masuk?q=' . urlencode($q);
+            $config['first_url'] = base_url() . 'data_masuk?q=' . urlencode($q);
         } else {
-            $config['base_url'] = base_url() . 'realisasi';
-            $config['first_url'] = base_url() . 'realisasi';
+            $config['base_url'] = base_url() . 'data_masuk';
+            $config['first_url'] = base_url() . 'data_masuk';
         }
 
         $config['per_page'] = 10;
         $config['page_query_string'] = TRUE;
-        $config['total_rows'] = $this->Realisasi_model->total_rows($q);
-        $realisasi = $this->Realisasi_model->get_limit_data($config['per_page'], $start, $q);
+        $config['total_rows'] = $this->Data_masuk_model->total_rows($q);
+        $data_masuk = $this->Data_masuk_model->get_limit_data($config['per_page'], $start, $q);
 
         $this->load->library('pagination');
         $this->pagination->initialize($config);
@@ -40,25 +40,25 @@ class Realisasi extends CI_Controller
         $data = array(
             'user' => $this->db->get_where('user', ['email' =>
             $this->session->userdata('email')])->row_array(),
-            'pengajuan_data' => $realisasi,
+            'pengajuan_data' => $data_masuk,
             'q' => $q,
             'pagination' => $this->pagination->create_links(),
             'total_rows' => $config['total_rows'],
             'start' => $start,
             'classnyak' => $this
         );
-        $this->template->load('realisasi/realisasi_list', $data);
+        $this->template->load('data_masuk/data_masuk_list', $data);
     }
 
     public function read($id) 
     {
-        $row = $this->Realisasi_model->get_by_id($id);
+        $row = $this->Data_masuk_model->get_by_id($id);
         if ($row) {
             $data = array(
                 'user' => $this->db->get_where('user', ['email' =>
                 $this->session->userdata('email')])->row_array(),
                 
-		'id_realisasi' => $row->id_realisasi,
+		'id_data_masuk' => $row->id_data_masuk,
 		'fisical_year' => $row->fisical_year,
 		'period' => $row->period,
 		'posting_date' => $row->posting_date,
@@ -73,24 +73,24 @@ class Realisasi extends CI_Controller
 		'co_area_curency' => $row->co_area_curency,
 		'Val_coarea_crcy' => $row->Val_coarea_crcy,
 	    );
-            $this->template->load('realisasi/realisasi_read', $data);
+            $this->template->load('data_masuk/data_masuk_read', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('realisasi'));
+            redirect(site_url('data_masuk'));
         }
     }
     
     public function delete($id) 
     {
-        $row = $this->Realisasi_model->get_by_id($id);
+        $row = $this->Data_masuk_model->get_by_id($id);
 
         if ($row) {
-            $this->Realisasi_model->delete($id);
+            $this->Data_masuk_model->delete($id);
             $this->session->set_flashdata('message', 'Delete Record Success');
-            redirect(site_url('realisasi'));
+            redirect(site_url('data_masuk'));
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('realisasi'));
+            redirect(site_url('data_masuk'));
         }
     }
 
@@ -110,15 +110,15 @@ class Realisasi extends CI_Controller
 	$this->form_validation->set_rules('co_area_curency', 'co area curency', 'trim|required');
 	$this->form_validation->set_rules('Val_coarea_crcy', 'val coarea crcy', 'trim|required');
 
-	$this->form_validation->set_rules('id_realisasi', 'id_realisasi', 'trim');
+	$this->form_validation->set_rules('id_data_masuk', 'id_data_masuk', 'trim');
 	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
     }
 
     public function excel()
     {
         $this->load->helper('exportexcel');
-        $namaFile = "realisasi.xls";
-        $judul = "realisasi";
+        $namaFile = "data_masuk.xls";
+        $judul = "data_masuk";
         $tablehead = 0;
         $tablebody = 1;
         $nourut = 1;
@@ -150,7 +150,7 @@ class Realisasi extends CI_Controller
 	xlsWriteLabel($tablehead, $kolomhead++, "Co Area Curency");
 	xlsWriteLabel($tablehead, $kolomhead++, "Val Coarea Crcy");
 
-	foreach ($this->Realisasi_model->get_all() as $data) {
+	foreach ($this->Data_masuk_model->get_all() as $data) {
             $kolombody = 0;
 
             //ubah xlsWriteLabel menjadi xlsWriteNumber untuk kolom numeric
@@ -184,8 +184,8 @@ class Realisasi extends CI_Controller
 
 }
 
-/* End of file Realisasi.php */
-/* Location: ./application/controllers/Realisasi.php */
+/* End of file data_masuk.php */
+/* Location: ./application/controllers/data_masuk.php */
 /* Please DO NOT modify this information : */
 /* Generated by Harviacode Codeigniter CRUD Generator 2021-12-23 13:03:35 */
 /* http://harviacode.com */
