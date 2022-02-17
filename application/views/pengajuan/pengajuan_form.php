@@ -178,6 +178,7 @@
                                                                     <span aria-hidden="true">&times;</span>
                                                                 </button>
                                                             </div>`)
+                                $('#id_pengajuan').val(dt.id_pengajuan);
                             }
                         } else {
                             Toast.fire({
