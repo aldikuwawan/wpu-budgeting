@@ -241,7 +241,8 @@ class Pengajuan extends CI_Controller
 
                 $this->Pengajuan_model->update($id_pengajuan,$datatoupdate);
             }
-        } else {
+        }
+        if(!$id_pengajuan) {
 
             $datatoinsert = array(
                 'data_pengajuan' => json_encode($listpengajuannya),
