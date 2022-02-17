@@ -58,9 +58,7 @@
             <td><?php echo $pengajuan->tanggal ?></td>
             <td style="text-align:center" width="200px">
                 <?php 
-                echo anchor(site_url('pengajuan/read/'.$pengajuan->id_pengajuan),'Read'); 
-                echo ' | '; 
-                echo anchor(site_url('pengajuan/update/'.$pengajuan->id_pengajuan),'Update'); 
+                echo anchor(site_url('data_masuk/read/'.$pengajuan->id_pengajuan),'Read'); 
                 echo ' | '; 
                 echo anchor(site_url('pengajuan/delete/'.$pengajuan->id_pengajuan),'Delete','onclick="javasciprt: return confirm(\'Are You Sure ?\')"'); 
                 ?>

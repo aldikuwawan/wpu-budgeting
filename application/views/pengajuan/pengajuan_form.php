@@ -1,20 +1,7 @@
-<style>
-/*    #tabel_pengajuan {
-        counter-reset: rowNumber;
-    }
-
-    #tabel_pengajuan tr::before {
-        display: table-cell;
-        counter-increment: rowNumber;
-        content: counter(rowNumber) ".";
-        padding-right: 0.3rem;
-        text-align: left;
-    }*/
-</style>
-
-
-<input type="hidden" id="id_pengajuan" value="<?php echo $id_pengajuan ?>">
     <div class="container-fluid">
+        <div class="alert-wrapper">
+
+        </div>
         <h2 style="margin-top:0px"><span id="tindakan"><?php echo $button ?></span> Pengajuan <?php echo $status_kirim == 0 ? '<span class="badge bg-danger text-white">Draft</span>' : '<span class="badge bg-success text-white">Terkirim</span>'; ?></h2>
         <form id="form_pengajuan">
 
@@ -66,7 +53,14 @@
                             <input type="text" id="value" class="form-control" placeholder="Value">
                         </div>
                         <div class="col-2" style="padding: 2px;">
-                            <button class="btn btn-primary btn-block btn-add-data" data-idpengajuan="<?php echo $id_pengajuan ?>" type="button">Add</button>
+                            <div class="btn-group" style="width: 100%;">
+                                <button class="btn btn-primary btn-add-data" data-idpengajuan="<?php echo $id_pengajuan ?>" type="button">Add</button>
+                                
+                                <button class="btn btn-success btn-import-excel-local" data-idpengajuan="<?php echo $id_pengajuan ?>" type="button" onclick="fileuploadexcelclick();"><i class="fa fa-file-excel"></i></button>
+                                <input type="file" id="file_excel" class="form-control" style="display: none;">
+
+
+                            </div>
                         </div>
                     </div>
                     <?php
@@ -106,6 +100,7 @@
                         ?>
                     </tbody>
                 </table>
+                <input type="hidden" id="id_pengajuan" name="id_pengajuan" value="<?php echo $id_pengajuan ?>">
             </div>
             <?php
             if ($status_kirim == 0) {
@@ -120,6 +115,10 @@
     </div>
 
     <script>
+
+        function fileuploadexcelclick() {
+            $('#file_excel').click();
+        }
 
 
         $(document).ready(function() {
@@ -163,12 +162,23 @@
                     success: function(data) {
                         var dt = JSON.parse(data);
                         if (dt.status == 'ok') {
-                            Toast.fire({
-                                type: 'success',
-                                icon: 'success',
-                                title: 'Data berhasil diupdate'
-                            })
-                            $('#id_pengajuan').val(dt.id_pengajuan);
+                            if(dt.status == 'using old code') {
+                                Toast.fire({
+                                    type: 'success',
+                                    icon: 'success',
+                                    title: 'Data berhasil diupdate'
+                                })
+                                $('#id_pengajuan').val(dt.id_pengajuan);
+                            } else {
+                                // replace url bar to pengajuan/update/dt.id_pengajuan without refreshing
+                                window.history.replaceState({}, '', '<?php echo site_url('pengajuan/update/') ?>' + dt.id_pengajuan);
+                                $('.alert-wrapper').html(`<div class="alert alert-success alert-dismissible fade show" role="alert">
+                                                                <strong>Tidak Perlu Khawatir.</strong> Data yang diketik pada pengajuan sudah Tersimpan otomatis
+                                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>`)
+                            }
                         } else {
                             Toast.fire({
                                 icon: 'error',
@@ -178,6 +188,39 @@
                         }
                     }
                 });
+            }
+
+            // function upload file ajax
+            function upload_file_ajax() {
+                var formData = new FormData();
+                var file = $('#file_excel')[0].files[0];
+                formData.append('file_excel', file);
+                $.ajax({
+                    url: '<?php echo site_url('pengajuan/get_data_excel') ?>',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(data) {
+                        var dt = JSON.parse(data);
+                        if (dt.status == 'ok') {
+                            Toast.fire({
+                                type: 'success',
+                                icon: 'success',
+                                title: 'Berhasil import data'
+                            })
+                            $('#list_data').append(dt.data);
+                            update_data()
+                        } else {
+                            Toast.fire({
+                                icon: 'error',
+                                type: 'error',
+                                title: 'Data gagal diupload'
+                            })
+                        }
+                    }
+                });
+                $('#file_excel').val('');
             }
 
             $(document).on('click','.btn-add-data',function(e) {
@@ -294,6 +337,12 @@
 
                                     if (dt.response == 'ok') {
                                         window.location.href = '<?php echo base_url().'pengajuan/success?thing=Pengajuan&operation=send' ?>'
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: "Oops!",
+                                            text: 'Terjadi kesalahan, silahkan coba lagi'
+                                        })
                                     }
                                 },
                                 error: function(error) {
@@ -302,7 +351,6 @@
                                       title: "Oops!",
                                       text: 'Tidak dapat tersambung dengan server, pastikan koneksi anda aktif, jika masih terjadi hubungi admin IT'
                                     })
-                                    btnselected.html('KIRIM').removeClass('disabled').removeAttr('disabled')
                                 }
                             });
                         } else {
@@ -310,6 +358,10 @@
                         }
                 })
             })
+
+            $('#file_excel').change(function() {
+                upload_file_ajax();
+            });
         })
 
     </script>

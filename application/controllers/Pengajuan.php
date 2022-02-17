@@ -4,6 +4,10 @@ if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 date_default_timezone_set('Asia/Jakarta');
 
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class Pengajuan extends CI_Controller
 {
     function __construct()
@@ -66,7 +70,7 @@ class Pengajuan extends CI_Controller
     	    'pengimput' => set_value('pengimput'),
     	    'status_kirim' => set_value('status_kirim'),
     	    'tanggal' => set_value('tanggal'),
-            'keterangan' => set_value('keterangan'),
+            'keterangan' => set_value('keterangan')
     	);
         $this->template->load('pengajuan/pengajuan_form', $data);
     }
@@ -124,7 +128,10 @@ class Pengajuan extends CI_Controller
             // redirect(site_url('pengajuan'));
 
         } else {
-            echo 'error sending pengajuan';
+            $arr = array(
+                'response' => 'no'
+            );
+            echo json_encode($arr);
         }
 
     }
@@ -326,6 +333,73 @@ class Pengajuan extends CI_Controller
 
         redirect(site_url('pengajuan'));
     }
+
+    public function get_data_excel()
+    {
+        $str = '';
+        $fileName = $_FILES['file_excel']['name'];
+         
+        $config['upload_path'] = './temp_doc/'; //path upload
+        $config['file_name'] = $fileName;  // nama file
+        $config['allowed_types'] = 'xls|xlsx|csv'; //tipe file yang diperbolehkan
+        $config['max_size'] = 10000; // maksimal sizze
+ 
+        $this->load->library('upload'); //meload librari upload
+        $this->upload->initialize($config);
+          
+        if(!$this->upload->do_upload('file_excel')){
+            echo $this->upload->display_errors();
+            exit();
+        }
+
+        $inputFileName = './temp_doc/'.$fileName;
+ 
+        try {
+
+            $inputFileType = IOFactory::identify($inputFileName);
+            $objReader = IOFactory::createReader($inputFileType);
+            $objExcel = $objReader->load($inputFileName);
+        } catch(Exception $e) {
+            die('Error loading file "'.pathinfo($inputFileName,PATHINFO_BASENAME).'": '.$e->getMessage());
+        }
+
+        $sheet = $objExcel->getActiveSheet()->toArray(null, true, true, true);
+        $sh = $objExcel->getActiveSheet();
+
+        $numrow = 1;
+
+        for ($i=2; $i <= count($sheet); $i++) { 
+        	$juduldatautama = $sh->getCellByColumnAndRow(1,1)->getValue();
+
+            $cost_center = $sheet[$i]['A'];
+        	$cost_element_name = $sheet[$i]['B'];
+            $cost_element = $sheet[$i]['C'];
+            $work_activity = $sheet[$i]['D'];
+            $value = $sheet[$i]['E'];
+
+            $realcount = $i - 1;
+
+            $str.= '<tr>
+                    <td>'.$cost_center.'<input type="hidden" value="'.$cost_center.'" class="cost_center" name="cost_center[]"/></td>
+                    <td>'.$cost_element_name.'<input type="hidden" value="'.$cost_element_name.'" class="cost_element_name" name="cost_element_name[]"/></td>
+                    <td>'.$cost_element.'<input type="hidden" value="'.$cost_element.'" class="cost_element" name="cost_element[]"/></td>
+                    <td>'.$work_activity.'<input type="hidden" value="'.$work_activity.'" class="work_activity" name="work_activity[]"/></td>
+                    <td>'.$value.'<input type="hidden" value="'.$value.'" class="value" name="value[]"/></td>
+                    <td><input type="hidden" value="'.$realcount.'" class="unique_id" name="unique_id[]"/>Edit | Delete</td>
+                </tr>';
+
+        	$numrow++;
+        }
+        //print_r($arraysoaldata);
+
+        unlink($inputFileName);
+        $arrayresp = array(
+            'status' => 'ok',
+            'message' => 'success',
+            'data' => $str
+        );
+        echo json_encode($arrayresp);
+	}
 
 }
 

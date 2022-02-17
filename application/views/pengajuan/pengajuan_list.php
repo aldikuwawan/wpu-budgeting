@@ -12,7 +12,7 @@
     }
 ?>
     <div class="container-fluid">
-        <h2 style="margin-top:0px">Pengajuan List</h2>
+        <h2 style="margin-top:0px">List Pengajuan <?= get_fungsiname($this->session->userdata('role_id')) ?></h2>
         <div class="row" style="margin-bottom: 10px">
             <div class="col-md-4">
                 <?php echo anchor(site_url('pengajuan/create'),'Create', 'class="btn btn-primary"'); ?>

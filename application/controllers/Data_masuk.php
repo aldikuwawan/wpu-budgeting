@@ -3,12 +3,16 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
+    use PhpOffice\PhpSpreadsheet\Spreadsheet;
+    use PhpOffice\PhpSpreadsheet\IOFactory;
+    use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class Data_masuk extends CI_Controller
 {
     function __construct()
     {
         parent::__construct();
         $this->load->model('Data_masuk_model');
+        $this->load->model('Pengajuan_model');
         $this->load->library('form_validation');
         $this->load->library('template');
         
@@ -52,27 +56,29 @@ class Data_masuk extends CI_Controller
 
     public function read($id) 
     {
-        $row = $this->Data_masuk_model->get_by_id($id);
+        $row = $this->Pengajuan_model->get_by_id($id);
+        $p = $this->db->get_where('user', ['email' =>
+            $this->session->userdata('email')
+            ])->row_array();
+
         if ($row) {
+            $p = $this->db->get_where('user', [
+                'id' => $row->user_id
+            ])->row_array();
+
+            $role_data = $this->db->where('id', $row->pengimput)->get('user_role')->row();
             $data = array(
-                'user' => $this->db->get_where('user', ['email' =>
-                $this->session->userdata('email')])->row_array(),
-                
-		'id_data_masuk' => $row->id_data_masuk,
-		'fisical_year' => $row->fisical_year,
-		'period' => $row->period,
-		'posting_date' => $row->posting_date,
-		'dokumen_date' => $row->dokumen_date,
-		'cost_element' => $row->cost_element,
-		'cost_element_descr' => $row->cost_element_descr,
-		'object_type' => $row->object_type,
-		'wbs_element' => $row->wbs_element,
-		'project_devinition' => $row->project_devinition,
-		'co_object_name' => $row->co_object_name,
-		'name' => $row->name,
-		'co_area_curency' => $row->co_area_curency,
-		'Val_coarea_crcy' => $row->Val_coarea_crcy,
-	    );
+                'user' => $p,
+        		'id_pengajuan' => $row->id_pengajuan,
+                'nama_penginput' => $p['name'],
+                'role' => $role_data->role,
+        		'data_pengajuan' => $row->data_pengajuan,
+        		'jenis_pengajuan' => set_value('jenis_pengajuan', $row->jenis_pengajuan),
+        		'pengimput' => set_value('pengimput', $row->pengimput),
+        		'status_kirim' => set_value('status_kirim', $row->status_kirim),
+        		'tanggal' => set_value('tanggal', $row->tanggal),
+                'keterangan' => set_value('keterangan', $row->keterangan),
+    	    );
             $this->template->load('data_masuk/data_masuk_read', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
