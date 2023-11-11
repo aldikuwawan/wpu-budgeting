@@ -251,62 +251,13 @@
             $(document).on('click','.btn-save-as-draft',function(e) {
 
                 e.preventDefault()
-
-                var jenis_pengajuan = $('#jenis_pengajuan').val()
-
                 var thisel = $('this')
-
-                var btnaddelemen = $('.btn-add-data')
 
                 thisel.html('<i class="fas fa-sync fa-spin"></i>').addClass('disabled').attr('disabled')
 
-                var id_pengajuan = btnaddelemen.attr('data-idpengajuan')
-                var keterangan = $('#keterangan').val()
+                update_data()
 
-                $.ajax({
-                    type: "POST",
-                    url: "<?php echo base_url().'Pengajuan/save_pengajuan_as_draft'?>",
-                    data: {
-                        id_pengajuan: id_pengajuan,
-                        jenis_pengajuan: jenis_pengajuan,
-                        keterangan: keterangan
-                    },
-                    success: function(data){
-                        var dt = JSON.parse(data)
-                            
-                        if (dt.status == 'ok') {
-                            if (dt.message == 'using old code') {
-                                btnaddelemen.attr('data-idpengajuan',dt.id_pengajuan)
-                                Toast.fire({
-                                  icon: 'success',
-                                  title: 'Berhasil menyimpan sebagai draft'
-                                })
-                            }
-
-                            if (dt.message == 'new code') {
-                                btnaddelemen.attr('data-idpengajuan',dt.id_pengajuan)
-                                Toast.fire({
-                                  icon: 'success',
-                                  title: 'Berhasil menyimpan sebagai draft'
-                                })
-                            }
-
-                            $('#tindakan').text('Edit')
-                        }
-
-                        //getAllKuesioner()
-                        thisel.html('Simpan Sebagai Draft').removeClass('disabled').removeAttr('disabled')
-                    },
-                    error: function(error) {
-                        Swal.fire({
-                          icon: 'error',
-                          title: "Oops!",
-                          text: 'Tidak dapat tersambung dengan server, pastikan koneksi anda aktif, jika masih terjadi hubungi admin IT'
-                        })
-                        thisel.html('Simpan Sebagai Draft').removeClass('disabled').removeAttr('disabled')
-                    }
-                });
-
+                thisel.html('Simpan Sebagai Draft').removeClass('disabled').removeAttr('disabled')
             })
 
             $(document).on('submit','#form_pengajuan', function(e) {
